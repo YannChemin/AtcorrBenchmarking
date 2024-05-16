@@ -37,8 +37,14 @@ sixs: $(OBJECTS0) $(OBJECTS1) $(OBJECTS2)
 	$(FC)  $(OBJECTS2) $(OBJECTS0) -o sixsV2.1-lutaero  -lm
  	
 
-clean:
+clean_obj:
 	rm -f *.o
 	
-	
+clean:
+	rm -f sixsV2.1
+	rm -f sixsV2.1-lutaero
+
+install:
+	cp -f sixsV2.1 /usr/local/bin/
+	cp -f sixsV2.1-lutaero /usr/local/bin/
 	
