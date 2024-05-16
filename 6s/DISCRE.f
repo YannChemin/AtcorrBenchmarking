@@ -27,7 +27,13 @@
          endif
       xd=abs(ti-x2)
       if(xd.lt.0.00001) go to 705
-      if(ti-x2) 701,703,703
+      if (ti-x2 < 0) then
+        goto 701
+      else if (ti-x2 == 0) then
+        goto 703
+      else
+        goto 703
+      end if
   701 y3=y2
       go to 706
   703 y1=y2

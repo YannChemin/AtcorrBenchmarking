@@ -6,19 +6,20 @@
       real brdftemp(10,13)
       real gaussmu,gaussphi,y
       integer j,k
-      do 10 j=1,np
-      do 10 k=1,mu
-   10 brdfint(k,j)=0.
+      do j=1,np
+        do k=1,mu
+          brdfint(k,j)=0.
+        end do
+      end do
       call splie2(angphi,brdfdat,10,13,brdftemp)
-      do 1 j=1,np
-      do 2 k=1,mu
-      gaussmu=rm(k)
-      gaussphi=rp(j)
-      call splin2(angmu,angphi,brdfdat,brdftemp,10,13,
-     s      gaussmu,gaussphi,
-     s      y)
-      brdfint(k,j)=y
-   2  continue
-   1  continue
+      do j=1,np
+        do k=1,mu
+            gaussmu=rm(k)
+            gaussphi=rp(j)
+            call splin2(angmu,angphi,brdfdat,brdftemp,10,13,
+     s      gaussmu,gaussphi,y)
+            brdfint(k,j)=y
+        end do
+      end do
       return
       end

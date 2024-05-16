@@ -93,7 +93,7 @@ c
       sp  = 0.d0
       cp  = 1.d0
 c
-      do 10 i2 = 1, n2
+      do i2 = 1, n2
          th1  = (1.d0 - u2(i2))*pi1
          sth1 = sin(th1)
          cth1 = cos(th1)
@@ -108,33 +108,33 @@ c
 c
          rrl   = rrls
          bqint = bqint + a2(i2)*(bi + bd)*sth1*cth1
-10    continue
+      end do
 c
       bqint = bqint*pi
       goto 1
 c
 4     continue
-      do 14 i = 1, n1
+      do i = 1, n1
          thi     = u1(i)*th
          tt3(i)  = thi
          stt3(i) = sin(thi)
          ctt3(i) = cos(thi)
-14    continue
+      end do
 c
-      do 15 i = 1, n2
+      do i = 1, n2
          thi     = u2(i)*(th - pi1) + pi1
          tt2(i)  = thi
          stt2(i) = sin(thi)
          ctt2(i) = cos(thi)
-15    continue
+      end do
 c
-      do 11 j = 1, n1
+      do j = 1, n1
          phi  = (1.d0 - u1(j))*pi
          sp   = sin(phi)
          cp   = cos(phi)
          bd1  = 0.d0
          bd2  = 0.d0
-         do 12 i1 = 1, n1
+         do i1 = 1, n1
             th1  = tt3(i1)
             sth1 = stt3(i1)
             cth1 = ctt3(i1)
@@ -151,29 +151,29 @@ c
          rrl = rrls
 c
             bd1 = bd1 + a1(i1)*(bi + bd)*sth1*cth1
-12       continue
+         end do
 c
-         do 13 i2 = 1, n2
+         do i2 = 1, n2
             th1  = tt2(i2)
             sth1 = stt2(i2)
             cth1 = ctt2(i2)
 c
-         rrls = rrl
+            rrls = rrl
 c
-         call biz
+            call biz
 c
-         rrl = refl
-         rtp = rrl + ttl
+            rrl = refl
+            rtp = rrl + ttl
 c
-         call difr92
+            call difr92
 c
-         rrl = rrls
+            rrl = rrls
 c
             bd2 = bd2 + a2(i2)*(bi + bd)*sth1*cth1
-13       continue
+         end do
 c
          bqint = bqint + ((pi1 - th)*bd2 + th*bd1)*a1(j)
-11    continue
+      end do
 c
       bqint = bqint + bqint
 c
@@ -693,14 +693,16 @@ c
       if (fb .lt. 0.d0) fb = fb + pi4
       f(4) = fb
       f(5) = phi + fa
-      do 75 ii = 2, 4
+      do ii = 2, 4
          i1 = ii + 1
-         do 75 j = i1, 5
+         do j = i1, 5
             fa = f(ii)
             fb = f(j)
             if (fb .gt. fa) goto 75
             f(ii) = fb
             f(j)  = fa
+        end do
+      end do
 75    continue
       f(1) = f(5) - pi4
       i1   = 1
@@ -1361,11 +1363,11 @@ c
 13    continue
 c
       nq1 = nq+1
-      do 15 i = 1,n
+      do i = 1,n
          ii   = nq1-i
          u(i) = -u(ii)
          a(i) = a(ii)
-15    continue
+      end do
 c
       return
       end
@@ -1483,44 +1485,44 @@ c
       cth10 = cos(th10)
 c
       mu1 = rm(0)
-      do 1 k = 1, np
-      do 2 j = 1, mu
-        mu2 = rm(j)
-        if (j .eq. mu) then
-           fi = rm(-mu)
-        else
-           fi = rp(k) + rm(-mu)
-        endif
-        th10 = acos(mu1)
-        if (fi .lt. 0.) fi = fi + 2.*pir
-        if (fi .gt. (2.*pir)) fi = fi - 2.*pir
-        if (fi .gt. pir) fi = 2.*pir - fi
-        tgt1 = tan(th10)
-        xx   = tgt1*clx/sl
+      do k = 1, np
+        do j = 1, mu
+            mu2 = rm(j)
+            if (j .eq. mu) then
+                fi = rm(-mu)
+            else
+                fi = rp(k) + rm(-mu)
+            endif
+            th10 = acos(mu1)
+            if (fi .lt. 0.) fi = fi + 2.*pir
+            if (fi .gt. (2.*pir)) fi = fi - 2.*pir
+            if (fi .gt. pir) fi = 2.*pir - fi
+            tgt1 = tan(th10)
+            xx   = tgt1*clx/sl
 c
-        if (xx .lt. eps) then
-            clmp1 = clz
-        else
-            clmp1 = 1.d0 - (1.d0 - clz)*integr(xx)
-        endif
+            if (xx .lt. eps) then
+                clmp1 = clz
+            else
+                clmp1 = 1.d0 - (1.d0 - clz)*integr(xx)
+            endif
 c
-        phi = fi
-        th1 = th10
-        th  = acos(mu2)
-        tgt = tan(th)
-        xx  = tgt*clx/sl
+            phi = fi
+            th1 = th10
+            th  = acos(mu2)
+            tgt = tan(th)
+            xx  = tgt*clx/sl
 c
-        if (xx .lt. eps) then
-            clmp = clz
-        else
-            clmp = 1.d0 - (1.d0 - clz)*integr(xx)
-        endif
+            if (xx .lt. eps) then
+                clmp = clz
+            else
+                clmp = 1.d0 - (1.d0 - clz)*integr(xx)
+            endif
 c
-        call msrm
-        brdfint(j, k) = bq
+            call msrm
+            brdfint(j, k) = bq
 c
-  2   continue
-  1   continue
+        end do
+      end do
 c
       return
       end
@@ -1570,22 +1572,24 @@ c
       ng = n + 1
       call dakg(uu, aa, n)
 c
-      do 20 i = 1, n2
+      do i = 1, n2
          i1    = ng - i
          a2(i) = aa(i)
-20       u2(i) = uu(i1)
+         u2(i) = uu(i1)
+      end do
 c
       n  = n1 + n1
       ng = n + 1
       call dakg(uu, aa, n)
 c
-      do 21 i = 1, n1
+      do i = 1, n1
          i1    = ng - i
          a1(i) = aa(i)
-21       u1(i) = uu(i1)
+         u1(i) = uu(i1)
+      end do
 c
       bdd = 0.d0
-      do 10 i2 = 1, n2
+      do i2 = 1, n2
          th  = (1.d0 - u2(i2))*pi1
          sth = sin(th)
          cth = cos(th)
@@ -1593,7 +1597,7 @@ c
          call akd
 c
          bdd = bdd + a2(i2)*bqint*sth*cth
-10    continue
+      end do
 c
       albbrdf = bdd*pi
 c

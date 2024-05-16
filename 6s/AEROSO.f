@@ -42,7 +42,7 @@ c      if(iaer.eq.0) return
  
       if (iaer.eq.12) then
         open(10,file=FILE)
-	read (10,*) nbmu
+        read (10,*) nbmu
         read(10,*)
         do l=1,20
           read(10,'(10x,4(3x,f8.4,3x))')ext(l),sca(l),ome(l),gasym(l)
@@ -51,16 +51,16 @@ c      if(iaer.eq.0) return
         do k=1,nbmu
           read(10,'(8x,20(1x,e10.4))')(phasel(l,k),l=1,20)
         enddo  
-	
-	if (ipol.ne.0)then
-	  do k=1,nbmu
- 	    read(10,'(8x,20(1x,e10.4))')(qhasel(l,k),l=1,20)
+        
+        if (ipol.ne.0)then
+          do k=1,nbmu
+            read(10,'(8x,20(1x,e10.4))')(qhasel(l,k),l=1,20)
           enddo
-	  do k=1,nbmu
- 	    read(10,'(8x,20(1x,e10.4))')(uhasel(l,k),l=1,20)
+          do k=1,nbmu
+            read(10,'(8x,20(1x,e10.4))')(uhasel(l,k),l=1,20)
           enddo
-	endif
-	nquad=nbmu
+        endif
+        nquad=nbmu
         close(10)
       endif
       
@@ -84,9 +84,9 @@ c - calculation of gauss points
       pdgs_S(nbmu)=0.
 c - calculation of gauss points
 
-      do 7 k=1,nbmu-1
+      do k=1,nbmu-1
         if((xmud.ge.cgaus_S(k)).and.(xmud.lt.cgaus_S(k+1))) go to 8
-    7 continue
+      end do
       return
     8 j1=k
       j2=j1+1
@@ -97,33 +97,34 @@ c - calculation of gauss points
         do l=1,20
           phase(l)=phasel(l,j1)+coef*(phasel(l,j1)-phasel(l,j2))
         enddo
-	if (ipol.ne.0)then
+        if (ipol.ne.0)then
           do l=1,20
             qhase(l)=qhasel(l,j1)+coef*(qhasel(l,j1)-qhasel(l,j2))
             uhase(l)=uhasel(l,j1)+coef*(uhasel(l,j1)-uhasel(l,j2))
           enddo
-	endif
+        endif
         return
       endif
       
-      do 1 l=1,20
-       ext(l)=0.
-       sca(l)=0.
-       if(l.eq.4.and.iaer.eq.0) ext(l)=1.
-       ome(l)=0.
-       gasym(l)=0.
-       phase(l)=0.
-       qhase(l)=0.
-       uhase(l)=0.
-       do 1 k=1,nbmu
-        phasel(l,k)=0.
-        qhasel(l,k)=0.
-        uhasel(l,k)=0.
-    1 continue
+      do l=1,20
+        ext(l)=0.
+        sca(l)=0.
+        if(l.eq.4.and.iaer.eq.0) ext(l)=1.
+        ome(l)=0.
+        gasym(l)=0.
+        phase(l)=0.
+        qhase(l)=0.
+        uhase(l)=0.
+        do k=1,nbmu
+            phasel(l,k)=0.
+            qhasel(l,k)=0.
+            uhasel(l,k)=0.
+        end do
+      end do
  
-      do 2 j=1,4
-       ci(j)=co(j)
-    2 continue
+      do j=1,4
+        ci(j)=co(j)
+      end do
 
       if(iaer.eq.0) goto 777
 
@@ -141,7 +142,7 @@ c     (stratospherique aerosol model...)
 
 c     (user defined model from size distribution)
          if (iaer.ge.8.and.iaer.le.11) then
-	   call mie(iaer,wldis,ex,sc,asy,ipol)
+           call mie(iaer,wldis,ex,sc,asy,ipol)
          endif
 
          do l=1,20
@@ -150,16 +151,16 @@ c     (user defined model from size distribution)
              pha(1,l,k)=ph(l,k)
            enddo
          enddo
-	 if (ipol.ne.0)then
-	   do l=1,20
-	     qq(1,l)=qh(l,j1)+coef*(qh(l,j1)-qh(l,j2))
+         if (ipol.ne.0)then
+           do l=1,20
+             qq(1,l)=qh(l,j1)+coef*(qh(l,j1)-qh(l,j2))
              uu(1,l)=uh(l,j1)+coef*(uh(l,j1)-uh(l,j2))
              do k=1,nbmu
                qha(1,l,k)=qh(l,k)
                uha(1,l,k)=uh(l,k)
-	     enddo
+             enddo
            enddo
-	 endif
+         endif
          icp=1
          cij(1)=1.00
 c for normalization of the extinction coefficient
@@ -172,12 +173,12 @@ c calling each sra components
 c extrapolate each component for wavelength
 
       do l=1,20
-	  do j=1,4
- 	   ex(j,l)=0
-	   sc(j,l)=0. 
-	   asy(j,l)=0.
-	  enddo
-	  enddo
+          do j=1,4
+           ex(j,l)=0
+           sc(j,l)=0. 
+           asy(j,l)=0.
+          enddo
+      enddo
    
 c  phase function of 4 components 
         do j=1,4
@@ -190,14 +191,14 @@ c  phase function of 4 components
            do k=1,nbmu
              pha(j,l,k)=ph(l,k)
            enddo
-	   if (ipol.ne.0)then
+           if (ipol.ne.0)then
              qq(j,l)=qh(l,j1)+coef*(qh(l,j1)-qh(l,j2))
              uu(j,l)=uh(l,j1)+coef*(uh(l,j1)-uh(l,j2))
              do k=1,nbmu
                qha(j,l,k)=qh(l,k)
                uha(j,l,k)=uh(l,k)
              enddo
-	   endif
+           endif
          enddo
       enddo 
 
@@ -205,79 +206,79 @@ c     summ of the ci/vi calculation
 
          sigm=0.
          sumni=0.0
-         do 3 i=1,4
-    3    sigm=sigm+ci(i)/vi(i)
+         do i=1,4
+            sigm=sigm+ci(i)/vi(i)
+         end do
  
 c     cij coefficients calculation
-         do 4 j=1,4
+         do j=1,4
            cij(j)=(ci(j)/vi(j)/sigm)
            sumni=sumni+cij(j)*ex(j,8)
-    4    continue
+         end do
 
          nis=1.d+00/sumni
       endif
 
-
 c     mixing parameters calculation
-      do 5 l=1,20
-        do 6 j=1,icp
+      do l=1,20
+        do j=1,icp
           ext(l)=ex(j,l)*cij(j)+ext(l)
           sca(l)=sc(j,l)*cij(j)+sca(l)
           gasym(l)=sc(j,l)*cij(j)*asy(j,l)+gasym(l)
           phase(l)=sc(j,l)*cij(j)*dd(j,l)+phase(l)
-          do 77 k=1,nbmu
+          do k=1,nbmu
             phasel(l,k)=sc(j,l)*cij(j)*pha(j,l,k)+phasel(l,k)
-   77     continue
-	  if (ipol.ne.0)then
-	    qhase(l)=sc(j,l)*cij(j)*qq(j,l)+qhase(l)
-	    uhase(l)=sc(j,l)*cij(j)*uu(j,l)+uhase(l)
-	    do k=1,nbmu
-	      qhasel(l,k)=sc(j,l)*cij(j)*qha(j,l,k)+qhasel(l,k)
-	      uhasel(l,k)=sc(j,l)*cij(j)*uha(j,l,k)+uhasel(l,k)
-	    enddo
-	  endif
-    6   continue
+          end do
+          if (ipol.ne.0)then
+            qhase(l)=sc(j,l)*cij(j)*qq(j,l)+qhase(l)
+            uhase(l)=sc(j,l)*cij(j)*uu(j,l)+uhase(l)
+            do k=1,nbmu
+              qhasel(l,k)=sc(j,l)*cij(j)*qha(j,l,k)+qhasel(l,k)
+              uhasel(l,k)=sc(j,l)*cij(j)*uha(j,l,k)+uhasel(l,k)
+            enddo
+          endif
+        end do
         ome(l)=sca(l)/ext(l)
         gasym(l)=gasym(l)/sca(l)
         phase(l)=phase(l)/sca(l)
-        do 78 k=1,nbmu
+        do k=1,nbmu
           phasel(l,k)=phasel(l,k)/sca(l)
-   78   continue
-	if (ipol.ne.0)then
-	  qhase(l)=qhase(l)/sca(l)
-	  uhase(l)=uhase(l)/sca(l)
-	  do k=1,nbmu
+        end do
+        if (ipol.ne.0)then
+          qhase(l)=qhase(l)/sca(l)
+          uhase(l)=uhase(l)/sca(l)
+          do k=1,nbmu
             qhasel(l,k)=qhasel(l,k)/sca(l)
             uhasel(l,k)=uhasel(l,k)/sca(l)
-	  enddo
-	endif
+          enddo
+        endif
         ext(l)=ext(l)*nis
         sca(l)=sca(l)*nis
-    5 continue
+      end do
 
       if (iaer.ge.8.and.iaer.le.11) then
         open(10,file=FILE)
-	write(10,*) nbmu
+        write(10,*) nbmu
         write(10,'(3x,A5,1x,5(1x,A10,1x),1x,A10)')'Wlgth','Nor_Ext_Co',
      s  'Nor_Sca_Co','Sg_Sca_Alb','Asymm_Para','Extinct_Co','Scatter_Co'
-        do 79 l=1,20
+        do l=1,20
           write(10,'(2x,f8.4,4(3x,f8.4,3x),2(2x,e10.4))')
      s    wldis(l),ext(l),sca(l),ome(l),gasym(l),ext(l)/nis,sca(l)/nis
- 79     continue
+        end do
         write(10,'(//,T20,A16,/,3x,A4,1x,20(3x,f6.4,2x))')
      s  ' Phase Function ','TETA',(wldis(l),l=1,20)
-        do 76 k=1,nbmu
+        do k=1,nbmu
           write(10,761)180.*acos(cgaus_S(k))/pi,(phasel(l,k),l=1,20)
- 76     continue
+        end do
  761    format (2x,f6.2,20(1x,e10.4))
-	if (ipol.ne.0)then
-	  do k=1,nbmu
+        if (ipol.ne.0)then
+          do k=1,nbmu
             write(10,761)180.*acos(cgaus_S(k))/pi,(qhasel(l,k),l=1,20)
-	  enddo
-	  do k=1,nbmu
+          enddo
+          do k=1,nbmu
             write(10,761)180.*acos(cgaus_S(k))/pi,(uhasel(l,k),l=1,20)
-	  enddo
-	endif
+          enddo
+        endif
         close(10)
       endif
       
