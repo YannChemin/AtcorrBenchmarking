@@ -19,7 +19,7 @@ c - to vary the number of quadratures
       ip1=nquad-3
       rac3=dsqrt(3.D+00)
       if(is.ne.0)go to 700
-      do 25 j=0,mu
+      do j=0,mu
         c=dble(rm(j))
         psl(0,-j)=1.
         psl(0,j)=1.
@@ -29,12 +29,12 @@ c - to vary the number of quadratures
         if (abs(xdb).lt.1.E-30) xdb=0.0
         psl(2,-j)=xdb
         psl(2,j)=xdb
-   25 continue
+      end do
       psl(1,0)=rm(0)
       goto 501
 c
   700 if(is.ne.1)go to 701
-      do 26 j=0,mu
+      do j=0,mu
         c=dble(rm(j))
         x=1.-c*c
         psl(0,j)=0.
@@ -43,17 +43,17 @@ c
         psl(1,j)=sqrt(x*0.5)
         psl(2,j)=c*psl(1,j)*rac3
         psl(2,-j)=-psl(2,j)
-   26 continue
+      end do
       psl(2,0)=-psl(2,0)
       goto 501
 c
   701 a=1
-      do 27 i=1,is
+      do i=1,is
         x=i
         a=a*sqrt((i+is)/x)*0.5
- 27   continue
+      end do
       b=a*sqrt(is/(is+1.))*sqrt((is-1.)/(is+2.))
-      do 28 j=0,mu
+      do j=0,mu
         c=dble(rm(j))
         xx=1.-c*c
         psl(is-1,j)=0.
@@ -61,44 +61,46 @@ c
         if (abs(xdb).lt.1.E-30) xdb=0.0
         psl(is,-j)=xdb
         psl(is,j)=xdb
-   28 continue
+      end do
   501 k=2
       ip=ip1
       if(is.gt.2)k=is
       if(k.eq.ip)goto 502
       ig=-1
       if(is.eq.1)ig=1
-      do 30 l=k,ip-1
+      do l=k,ip-1
         lp=l+1
         lm=l-1
         a=(2*l+1.)/sqrt((l+is+1.)*(l-is+1.))
         b=sqrt(float((l+is)*(l-is)))/(2.*l+1.)
-        do 31 j=0,mu
+        do j=0,mu
           c=dble(rm(j))
           xdb=a*(c*psl(l,j)-b*psl(lm,j))
           if (abs(xdb).lt.1.E-30) xdb=0.
           psl(lp,j)=xdb
           if(j.eq.0) go to 31
           psl(lp,-j)=ig*psl(lp,j)
+        end do
    31   continue
         ig=-ig
-   30 continue
+      end do
   502 continue
-      do 1005 j=-mu,mu
+      do j=-mu,mu
         xpl(j)=psl(2,j)
- 1005 continue
+      end do
       ij=ip1
-      do 32 j=0,mu
-        do 32 k=-mu,mu
+      do j=0,mu
+        do k=-mu,mu
           sbp=0.
           if(is.gt.ij) goto 1
-          do 33 l=is,ij
+          do l=is,ij
             bt=betal(l)
             sbp=sbp+dble(psl(l,j))*psl(l,k)*bt
-  33      continue
+          end do
  1        continue
           if (abs(sbp).lt.1.E-30) sbp=0.
           bp(j,k)=sbp
-   32 continue
+        end do
+      end do
       return
       end

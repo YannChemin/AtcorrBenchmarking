@@ -183,88 +183,87 @@ c****************************************************************************c
      s   rm(-mu_p:mu_p),gb(-mu_p:mu_p),rp(np_p),gp(np_p)
       dimension  xlmus(-mu_p:mu_p,np_p),xlmuv(-mu_p:mu_p,np_p)
       dimension angmu(10),angphi(13),brdfints(-mu_p:mu_p,np_p)
-     s    ,brdfdats(10,13),sbrdftmp(-1:1,1),sbrdf(1501),
-     s     srm(-1:1),srp(1),
-     s    brdfintv(-mu_p:mu_p,np_p),brdfdatv(10,13),robar(1501),
-     s    robarp(1501),robard(1501),xlm1(-mu_p:mu_p,np_p),
-     s    xlm2(-mu_p:mu_p,np_p)
-        real romix_fi(nfi_p),rorayl_fi(nfi_p),ratm2_fi(nfi_p),
-     s       refet_fi(nfi_p),roatm_fi(3,20,nfi_p),xlphim(nfi_p)
+     s   ,brdfdats(10,13),sbrdftmp(-1:1,1),sbrdf(1501),
+     s   srm(-1:1),srp(1),
+     s   brdfintv(-mu_p:mu_p,np_p),brdfdatv(10,13),robar(1501),
+     s   robarp(1501),robard(1501),xlm1(-mu_p:mu_p,np_p),
+     s   xlm2(-mu_p:mu_p,np_p)
+      real romix_fi(nfi_p),rorayl_fi(nfi_p),ratm2_fi(nfi_p),
+     s   refet_fi(nfi_p),roatm_fi(3,20,nfi_p),xlphim(nfi_p)
 c***********************************************************************
 c     for including BRDF as ground boundary condition
 c     in OSSUR (Vermote, 11/19/2010)
 c***********************************************************************
-        real rosur(0:mu_p,mu_p,83) 
-	real wfisur(83),fisur(83)
-	real xlsurf(-mu_p:mu_p,np_p),rolutsurf(mu_p,61)
-	real lddiftt,lddirtt,lsphalbt,ludiftt,ludirtt
-	real lxtrans(-1:1)
-	real rbar,rbarp,rbarc,rbarpc,rbard
+      real rosur(0:mu_p,mu_p,83) 
+      real wfisur(83),fisur(83)
+      real xlsurf(-mu_p:mu_p,np_p),rolutsurf(mu_p,61)
+      real lddiftt,lddirtt,lsphalbt,ludiftt,ludirtt
+      real lxtrans(-1:1)
+      real rbar,rbarp,rbarc,rbarpc,rbard
 c***********************************************************************
      
-        real rolut(mu_p,61),roluts(20,mu_p,61),roluti(mu_p,61)
-        real rolutq(mu_p,61),rolutsq(20,mu_p,61),rolutiq(mu_p,61)
-        real rolutu(mu_p,61),rolutsu(20,mu_p,61),rolutiu(mu_p,61)
-	real filut(mu_p,61)
-	integer aerod
-	real its,lutmuv,luttv,iscama,iscami,scaa,cscaa,cfi
-	integer nfilut(mu_p),nbisca
-	real dtr 
-        real anglem,weightm,rm,gb,accu2,accu3
-        real rp,gp,xlmus,xlmuv,angmu,angphi,brdfints,brdfdats
-        real brdfintv,brdfdatv,robar,robarp,robard,xlm1,xlm2
-        real c,wldisc,ani,anr,aini,ainr,rocl,roel,zpl,ppl,tpl,whpl
-        real wopl,xacc,s,wlinf,wlsup,delta
-	real nwlinf,nwlsup
-	integer niinf,nisup
-        real sigma,z,p,t,wh,wo,ext,ome,gasym,phase,qhase,roatm,dtdir
-        real dtdif,utdir,utdif,sphal,wldis,trayl,traypl,pi,pi2,step
-        real asol,phi0,avis,phiv,tu,xlon,xlat,xlonan,hna,dsol,campm
-        real phi,phirad,xmus,xmuv,xmup,xmud,adif,uw,uo3,taer55
-        real taer,v,xps,uwus,uo3us,xpp,taer55p,puw,puo3,puwus
-        real puo3us,wl,wlmoy,tamoy,tamoyp,pizmoy,pizmoyp,trmoy
-        real trmoyp,fr,rad,spalt,sha,sham,uhase
-        real albbrdf,par1,par2,par3,par4,robar1,xnorm1,rob,xnor,rodir
-        real rdown,rdir,robar2,xnorm2,ro,roc,roe,rapp,rocave,roeave
-        real seb,sbor,swl,sb,refet,refet1,refet2,refet3,alumet
-	real refeti,pinst,ksiinst,ksirad
-        real rpfet,rpfet1,rpfet2,rpfet3,plumet,plumeas
-        real tgasm,rog,dgasm,ugasm,sdwava,sdozon,sddica,sdoxyg
-        real sdniox,sdmoca,sdmeth,suwava,suozon,sudica,suoxyg
-        real suniox,sumoca,sumeth,stwava,stozon,stdica,stoxyg,stniox
-        real stmoca,stmeth,sodray,sodaer,sodtot,fophsr,fophsa,sroray
-        real sroaer,srotot,ssdaer,sdtotr,sdtota,sdtott,sutotr,sutota
-        real sutott,sasr,sasa,sast,dtozon,dtdica,dtoxyg
-        real dtniox,dtmeth,dtmoca,utozon,utdica,utoxyg,utniox
-        real utmeth,utmoca,attwava,ttozon,ttdica,ttoxyg,ttniox
-        real ttmeth,ttmoca,dtwava,utwava,ttwava,coef,romix,rorayl
-        real roaero,phaa,phar,tsca,tray,trayp,taerp,dtott,utott
-	real rqmix,rqrayl,rqaero,qhaa,qhar,foqhsr,foqhsa,foqhst
-	real rumix,rurayl,ruaero,uhaa,uhar,rpmix,rpaero,rprayl
-	real srpray,srpaer,srptot,rpmeas1,rpmeas2,rpmeas3
-	real srqray,srqaer,srqtot,sruray,sruaer,srutot
-        real astot,asray,asaer,utotr,utota,dtotr,dtota,dgtot,tgtot
-        real tgp1,tgp2,rqatm,ruatm,fouhst,fouhsr,fouhsa,coefp
-        real ugtot,edifr,edifa,tdird,tdiru,tdifd,tdifu,fra
-        real fae,avr,romeas1,romeas2,romeas3,alumeas,sodrayp
-        real sdppray,sdppaer,sdpptot,rop,sdpray,sdpaer,sdptot
-	real spdpray,spdpaer,spdptot
-        real ratm1,ratm2,ratm3,rsurf,rpatm1,rpatm2,rpatm3,rpsurf
-        real sodaerp,sodtotp,tdir,tdif,etn,esn,es,ea0n,ea0,ee0n
-        real ee0,tmdir,tmdif,xla0n,xla0,xltn,xlt,xlen,xle,pizera
-        real fophst,pizerr,pizert,xrad,xa,xb,xc
-        integer nt,mu,mu2,np,k,iwr,mum1,idatmp,ipol
-        integer j,iread,l,igeom,month,jday,nc,nl,idatm,iaer,iaerp,n
-        integer iwave,iinf,isup,ik,i,inhomo,idirec,ibrdf,igroun
-        integer igrou1,igrou2,isort,irapp,ilut
+      real rolut(mu_p,61),roluts(20,mu_p,61),roluti(mu_p,61)
+      real rolutq(mu_p,61),rolutsq(20,mu_p,61),rolutiq(mu_p,61)
+      real rolutu(mu_p,61),rolutsu(20,mu_p,61),rolutiu(mu_p,61)
+      real filut(mu_p,61)
+      integer aerod
+      real its,lutmuv,luttv,iscama,iscami,scaa,cscaa,cfi
+      integer nfilut(mu_p),nbisca
+      real dtr 
+      real anglem,weightm,rm,gb,accu2,accu3
+      real rp,gp,xlmus,xlmuv,angmu,angphi,brdfints,brdfdats
+      real brdfintv,brdfdatv,robar,robarp,robard,xlm1,xlm2
+      real c,wldisc,ani,anr,aini,ainr,rocl,roel,zpl,ppl,tpl,whpl
+      real wopl,xacc,s,wlinf,wlsup,delta
+      real nwlinf,nwlsup
+      integer niinf,nisup
+      real sigma,z,p,t,wh,wo,ext,ome,gasym,phase,qhase,roatm,dtdir
+      real dtdif,utdir,utdif,sphal,wldis,trayl,traypl,pi,pi2,step
+      real asol,phi0,avis,phiv,tu,xlon,xlat,xlonan,hna,dsol,campm
+      real phi,phirad,xmus,xmuv,xmup,xmud,adif,uw,uo3,taer55
+      real taer,v,xps,uwus,uo3us,xpp,taer55p,puw,puo3,puwus
+      real puo3us,wl,wlmoy,tamoy,tamoyp,pizmoy,pizmoyp,trmoy
+      real trmoyp,fr,rad,spalt,sha,sham,uhase
+      real albbrdf,par1,par2,par3,par4,robar1,xnorm1,rob,xnor,rodir
+      real rdown,rdir,robar2,xnorm2,ro,roc,roe,rapp,rocave,roeave
+      real seb,sbor,swl,sb,refet,refet1,refet2,refet3,alumet
+      real refeti,pinst,ksiinst,ksirad
+      real rpfet,rpfet1,rpfet2,rpfet3,plumet,plumeas
+      real tgasm,rog,dgasm,ugasm,sdwava,sdozon,sddica,sdoxyg
+      real sdniox,sdmoca,sdmeth,suwava,suozon,sudica,suoxyg
+      real suniox,sumoca,sumeth,stwava,stozon,stdica,stoxyg,stniox
+      real stmoca,stmeth,sodray,sodaer,sodtot,fophsr,fophsa,sroray
+      real sroaer,srotot,ssdaer,sdtotr,sdtota,sdtott,sutotr,sutota
+      real sutott,sasr,sasa,sast,dtozon,dtdica,dtoxyg
+      real dtniox,dtmeth,dtmoca,utozon,utdica,utoxyg,utniox
+      real utmeth,utmoca,attwava,ttozon,ttdica,ttoxyg,ttniox
+      real ttmeth,ttmoca,dtwava,utwava,ttwava,coef,romix,rorayl
+      real roaero,phaa,phar,tsca,tray,trayp,taerp,dtott,utott
+      real rqmix,rqrayl,rqaero,qhaa,qhar,foqhsr,foqhsa,foqhst
+      real rumix,rurayl,ruaero,uhaa,uhar,rpmix,rpaero,rprayl
+      real srpray,srpaer,srptot,rpmeas1,rpmeas2,rpmeas3
+      real srqray,srqaer,srqtot,sruray,sruaer,srutot
+      real astot,asray,asaer,utotr,utota,dtotr,dtota,dgtot,tgtot
+      real tgp1,tgp2,rqatm,ruatm,fouhst,fouhsr,fouhsa,coefp
+      real ugtot,edifr,edifa,tdird,tdiru,tdifd,tdifu,fra
+      real fae,avr,romeas1,romeas2,romeas3,alumeas,sodrayp
+      real sdppray,sdppaer,sdpptot,rop,sdpray,sdpaer,sdptot
+      real spdpray,spdpaer,spdptot
+      real ratm1,ratm2,ratm3,rsurf,rpatm1,rpatm2,rpatm3,rpsurf
+      real sodaerp,sodtotp,tdir,tdif,etn,esn,es,ea0n,ea0,ee0n
+      real ee0,tmdir,tmdif,xla0n,xla0,xltn,xlt,xlen,xle,pizera
+      real fophst,pizerr,pizert,xrad,xa,xb,xc
+      integer nt,mu,mu2,np,k,iwr,mum1,idatmp,ipol
+      integer j,iread,l,igeom,month,jday,nc,nl,idatm,iaer,iaerp,n
+      integer iwave,iinf,isup,ik,i,inhomo,idirec,ibrdf,igroun
+      integer igrou1,igrou2,isort,irapp,ilut
 c variables used in the BRDF coupling correction process
-	real robarstar,robarpstar,robarbarstar,tdd,tdu,tsd,tsu
-	real coefa,coefb,coefc,discri,rogbrdf,roglamb,rbardest
-	real romixatm,romixsur
+      real robarstar,robarpstar,robarbarstar,tdd,tdu,tsd,tsu
+      real coefa,coefb,coefc,discri,rogbrdf,roglamb,rbardest
+      real romixatm,romixsur
 c variables related to surface polarization
-        integer irop
-	real ropq,ropu,pveg,wspd,azw,razw
-
+      integer irop
+      real ropq,ropu,pveg,wspd,azw,razw
 
 c***********************************************************************
 c                 to vary the number of quadratures
@@ -3435,10 +3434,10 @@ C begining case for a lut output
 C SIMPLE LUT in azimuth
       if (ilut.eq.2) then
           do ifi=1,nfi
-	  xtphi=(ifi-1)*180.0/(nfi-1)
-	  write(6,*) "lutfi ",xtphi,ratm2_fi(ifi)
-	  enddo
-      endif	  
+            xtphi=(ifi-1)*180.0/(nfi-1)
+            write(6,*) "lutfi ",xtphi,ratm2_fi(ifi)
+          enddo
+      endif 
 
 C LUT FOR Look up table data        
       if (ilut.eq.1) then

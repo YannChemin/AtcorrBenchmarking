@@ -154,7 +154,7 @@ c
         altc(0)=300.
         zx=300.
         iplane=0
-        do 14 it=0,ntp
+        do it=0,ntp
           if (it.eq.0) then
             yy=0.
             dd=0.
@@ -183,7 +183,7 @@ c
           ratio=cr/(cr+ca)
           xdel(it)=(1.e+00-ratio)*piz
           ydel(it)=ratio
-  14    continue
+        end do
        endif
  901    Format(i2,f10.5,f10.5,f10.5)
  
@@ -250,23 +250,24 @@ c     enddo
 c
       pi=acos(-1.)
       phi=phirad
-      do 716 l=1,np
-        do 716 m=-mu,mu
-	  xli(m,l)=0.
-	  xlq(m,l)=0.
-	  xlu(m,l)=0.
- 716  continue
+      do l=1,np
+        do m=-mu,mu
+            xli(m,l)=0.
+            xlq(m,l)=0.
+            xlu(m,l)=0.
+        end do
+      end do
       do ifi=1,nfi
-      xlphim(ifi)=0.
+        xlphim(ifi)=0.
       enddo
       
 CCC initialization of look up table variable
       do i=1,mu
-      do j=1,41
-      rolut(i,j)=0.
-      rolutq(i,j)=0.
-      rolutu(i,j)=0.
-      enddo
+        do j=1,41
+            rolut(i,j)=0.
+            rolutq(i,j)=0.
+            rolutu(i,j)=0.
+        enddo
       enddo
       
 c
@@ -288,11 +289,11 @@ c
 c
 c     fourier decomposition
 c
-      do 17 j=-mu,mu
+      do j=-mu,mu
         i4(j)=0.
         q4(j)=0.
         u4(j)=0.
-   17 continue
+      end do
       iborm=nquad
       if (ta.le.acu2) iborm=2
       if( abs (xmus-1.000000) .lt.1.e-06)iborm=0
@@ -307,19 +308,25 @@ c
           roQavion(k-1)=0.
           roUavion(k-1)=0.
         enddo
-        do 16 j=-mu,mu
+        do j=-mu,mu
           i3(j)=0.
           q3(j)=0.
           u3(j)=0.
-   16   continue
+        end do
 c
 c     kernel computations + mixture rayleigh(1)-aerosol(2)
 c
         isp=is
         call kernelpol(isp,mu,rm,xpl,xrl,xtl,bp,gr,gt,arr,art,att)
         if(is.gt.0)beta0=0.
-        do 100 j=-mu,mu
-          if(is-2)200,200,201
+        do j=-mu,mu
+          if (is-2 < 0) then
+            goto 200
+          else if (is-2 == 0) then
+            goto 200
+          else
+            goto 201
+          end if
  200      spl=xpl(0)
           sa1=beta0+beta2*xpl(j)*spl
           sa2=bp(0,j)
@@ -337,20 +344,20 @@ c
 c
 c     primary scattering source function at every level within the layer
 c
- 202      do 101 k=0,nt
+ 202      do k=0,nt
             c=ch(k)
             a=ydel(k)
             b=xdel(k)
             i2(k,j)=c*(sa2*b+sa1*a)
             q2(k,j)=c*(sb2*b+sb1*a)
             u2(k,j)=-c*(sc2*b+sc1*a)
-  101     continue
-  100   continue
+          end do
+        end do
 c
 c     vertical integration, primary upward radiation
 c
  
-        do 108 k=1,mu
+        do k=1,mu
            i1(nt,k)=0.
            q1(nt,k)=0.
            u1(nt,k)=0.
@@ -358,7 +365,7 @@ c
            zq1=q1(nt,k)
            zu1=u1(nt,k)
            yy=rm(k)
-           do 108 i=nt-1,0,-1
+           do i=nt-1,0,-1
               jj=i+1
               f=h(jj)-h(i)
               c=exp(-f/yy)
@@ -379,11 +386,12 @@ c
               b=u2(i,k)-a*h(i)
               zu1=c*zu1+(d*(b+a*yy)+a*xx)*0.5e+00
               u1(i,k)=zu1
-  108   continue
+           end do
+        end do
 c
 c     vertical integration, primary downward radiation
 c
-        do 109 k=-mu,-1
+        do k=-mu,-1
           i1(0,k)=0.
           q1(0,k)=0.
           u1(0,k)=0.
@@ -391,7 +399,7 @@ c
           zq1=q1(0,k)
           zu1=u1(0,k)
           yy=rm(k)
-          do 109 i=1,nt
+          do i=1,nt
             jj=i-1
             f=h(i)-h(jj)
             c=exp(f/yy)
@@ -412,13 +420,20 @@ c
             b=u2(i,k)-a*h(i)
             zu1=c*zu1+(d*(b+a*yy)+a*xx)*0.5e+00
             u1(i,k)=zu1
-  109   continue
+          end do
+        end do
 c
 c     in(2,?) is inialized with scattering computed at n-2
 c     i3 is inialized with primary scattering
 c
-        do 20 k=-mu,mu
-          if(k) 21,20,23
+        do k=-mu,mu
+          if (k < 0) then
+            goto 21
+          else if (k == 0) then
+            goto 20
+          else
+            goto 23
+          end if
    21     index=nt
           go to 25
    23     index=0
@@ -432,6 +447,7 @@ c
           un(1,k)=u1(index,k)
           un(2,k)=u1(index,k)
           u3(k)=u1(index,k)
+        end do
    20   continue
         roIavion(2)=i1(iplane,mu)
         roIavion(-1)=i1(iplane,mu)
@@ -453,15 +469,21 @@ c
 c     if is < ou = 2 kernels are a mixing of aerosols and molecules kern
 c     if is >2 aerosols kernels only
 c
-        if(is-2)210,210,211
-  210   do455 k=1,mu
+        if (is-2 < 0) then
+            goto 210
+        else if (is-2 == 0) then
+            goto 210
+        else
+            goto 211
+        end if
+  210   do k=1,mu
           xpk=xpl(k)
           xrk=xrl(k)
           xtk=xtl(k)
           ypk=xpl(-k)
           yrk=xrl(-k)
           ytk=xtl(-k)
-          do 455 i=0,nt
+          do i=0,nt
             ii1=0.
             ii2=0.
             qq1=0.
@@ -470,7 +492,7 @@ c
             uu2=0.
             x=xdel(i)
             y=ydel(i)
-            do477 j=1,mu
+            do j=1,mu
               z=gb(j)
               xpj=xpl(j)
               xrj=xrl(j)
@@ -509,21 +531,21 @@ c
               xdb=xdb-xu1*gtkj-xu2*gtkmj
               ii2=ii2+xdb*z
               xdb=xi1*bpjmk+xi2*bpjk+xq1*grkmj+xq2*grkj
-	      xdb=xdb+xu1*gtkmj+xu2*gtkj
+              xdb=xdb+xu1*gtkmj+xu2*gtkj
               ii1=ii1+xdb*z
               xdb=xi1*grjk+xi2*grjmk+xq1*arrjk+xq2*arrjmk
               xdb=xdb-xu1*artjk+xu2*artjmk
-	      qq2=qq2+xdb*z
-	      xdb=xi1*grjmk+xi2*grjk+xq1*arrjmk+xq2*arrjk
-	      xdb=xdb-xu1*artjmk+xu2*artjk
-	      qq1=qq1+xdb*z
+              qq2=qq2+xdb*z
+              xdb=xi1*grjmk+xi2*grjk+xq1*arrjmk+xq2*arrjk
+              xdb=xdb-xu1*artjmk+xu2*artjk
+              qq1=qq1+xdb*z
               xdb=xi1*gtjk-xi2*gtjmk+xq1*artkj+xq2*artkmj
               xdb=xdb-xu1*attjk-xu2*attjmk
-	      uu2=uu2-xdb*z
+              uu2=uu2-xdb*z
               xdb=xi1*gtjmk-xi2*gtjk-xq1*artkmj-xq2*artkj
               xdb=xdb-xu1*attjmk-xu2*attjk
-	      uu1=uu1-xdb*z
- 477        continue
+              uu1=uu1-xdb*z
+            end do
             if (abs(ii2).lt.1.E-30) ii2=0.
             if (abs(ii1).lt.1.E-30) ii1=0.
             if (abs(qq2).lt.1.E-30) qq2=0.
@@ -536,12 +558,13 @@ c
             q2(i,-k)=qq1
             u2(i,k)=uu2
             u2(i,-k)=uu1
- 455    continue
+          end do
+        end do
         goto 213
 
 
- 211    do45 k=1,mu
-          do 45 i=0,nt
+ 211    do k=1,mu
+          do i=0,nt
             ii1=0.
             ii2=0.
             qq1=0.
@@ -549,7 +572,7 @@ c
             uu1=0.
             uu2=0.
             x=xdel(i)
-            do47 j=1,mu
+            do j=1,mu
               z=gb(j)
               xi1=i1(i,j)
               xi2=i1(i,-j)
@@ -568,34 +591,34 @@ c
               grjmk=gr(j,-k)*x
               grkj=gr(k,j)*x
               grkmj=gr(k,-j)*x
-	      arrjk=arr(j,k)*x
-	      arrjmk=arr(j,-k)*x
-	      artjk=art(j,k)*x
-	      artjmk=art(j,-k)*x
-	      artkj=art(k,j)*x
-	      artkmj=art(k,-j)*x
-	      attjk=att(j,k)*x
-	      attjmk=att(j,-k)*x
+              arrjk=arr(j,k)*x
+              arrjmk=arr(j,-k)*x
+              artjk=art(j,k)*x
+              artjmk=art(j,-k)*x
+              artkj=art(k,j)*x
+              artkmj=art(k,-j)*x
+              attjk=att(j,k)*x
+              attjmk=att(j,-k)*x
 
               xdb=xi1*bpjk+xi2*bpjmk+xq1*grkj+xq2*grkmj
               xdb=xdb-xu1*gtkj-xu2*gtkmj
               ii2=ii2+xdb*z
               xdb=xi1*bpjmk+xi2*bpjk+xq1*grkmj+xq2*grkj
-	      xdb=xdb+xu1*gtkmj+xu2*gtkj
+              xdb=xdb+xu1*gtkmj+xu2*gtkj
               ii1=ii1+xdb*z
               xdb=xi1*grjk+xi2*grjmk+xq1*arrjk+xq2*arrjmk
               xdb=xdb-xu1*artjk+xu2*artjmk
-	      qq2=qq2+xdb*z
-	      xdb=xi1*grjmk+xi2*grjk+xq1*arrjmk+xq2*arrjk
-	      xdb=xdb-xu1*artjmk+xu2*artjk
-	      qq1=qq1+xdb*z
+              qq2=qq2+xdb*z
+              xdb=xi1*grjmk+xi2*grjk+xq1*arrjmk+xq2*arrjk
+              xdb=xdb-xu1*artjmk+xu2*artjk
+              qq1=qq1+xdb*z
               xdb=xi1*gtjk-xi2*gtjmk+xq1*artkj+xq2*artkmj
               xdb=xdb-xu1*attjk-xu2*attjmk
-	      uu2=uu2-xdb*z
+              uu2=uu2-xdb*z
               xdb=xi1*gtjmk-xi2*gtjk-xq1*artkmj-xq2*artkj
               xdb=xdb-xu1*attjmk-xu2*attjk
-	      uu1=uu1-xdb*z
-   47       continue
+              uu1=uu1-xdb*z
+            end do
             if (abs(ii2).lt.1.E-30) ii2=0.
             if (abs(ii1).lt.1.E-30) ii1=0.
             if (abs(qq2).lt.1.E-30) qq2=0.
@@ -608,11 +631,12 @@ c
             q2(i,-k)=qq1
             u2(i,k)=uu2
             u2(i,-k)=uu1
-   45   continue
+          end do
+        end do
 c
 c     vertical integration, upward radiation
 c
- 213    do 48 k=1,mu
+ 213    do k=1,mu
           i1(nt,k)=0.
           q1(nt,k)=0.
           u1(nt,k)=0.
@@ -620,7 +644,7 @@ c
           zq1=q1(nt,k)
           zu1=u1(nt,k)
           yy=rm(k)
-          do 48 i=nt-1,0,-1
+          do i=nt-1,0,-1
             jj=i+1
             f=h(jj)-h(i)
             c=exp(-f/yy)
@@ -644,11 +668,12 @@ c
             zu1=c*zu1+(d*(b+a*yy)+a*xx)*0.5e+00
             if (abs(zu1).le.1.E-20) zu1=0.
             u1(i,k)=zu1
-   48   continue
+          end do
+        end do
 c
 c     vertical integration, downward radiation
 c
-        do 50 k=-mu,-1
+        do k=-mu,-1
           i1(0,k)=0.
           q1(0,k)=0.
           u1(0,k)=0.
@@ -656,7 +681,7 @@ c
           zq1=q1(0,k)
           zu1=u1(0,k)
           yy=rm(k)
-          do 50 i=1,nt
+          do i=1,nt
             jj=i-1
             f=h(i)-h(jj)
             c=exp(f/yy)
@@ -680,12 +705,19 @@ c
             zu1=c*zu1+(d*(b+a*yy)+a*xx)*0.5e+00
             if (abs(zu1).le.1.E-20) zu1=0.
             u1(i,k)=zu1
-   50   continue
+          end do
+        end do
 c
 c     in(0,?) is the nieme scattering order
 c
-        do 30 k=-mu,mu
-          if(k) 31,30,33
+        do k=-mu,mu
+          if(k<0) then
+            go to 31
+          else if (k == 0) then
+            go to 30
+          else
+            go to 33
+          end if
    31     index=nt
           go to 34
    33     index=0
@@ -693,6 +725,7 @@ c
           in(0,k)=i1(index,k)
           qn(0,k)=q1(index,k)
           un(0,k)=u1(index,k)
+        end do
    30   continue
         roIavion(0)=i1(iplane,mu)
         roQavion(0)=Q1(iplane,mu)
@@ -701,16 +734,16 @@ c
 c   convergence test (geometrical serie)
 c
         if(ig.gt.2) then
-          z=0.
+            z=0.
             a1=abs(roIavion(2))
             d1=abs(roIavion(1))
             g1=abs(roIavion(0))
-	    r1=abs(roIavion(-1))
+            r1=abs(roIavion(-1))
             if(a1.ge.acu.and.d1.ge.acu.and.r1.ge.acu) then
               a1=roIavion(2)
               d1=roIavion(1)
               g1=roIavion(0)
-	      r1=roIavion(-1)
+              r1=roIavion(-1)
               y=((g1/d1-d1/a1)/((1-g1/d1)**2)*(g1/r1))
               y=abs(y)
               z=dmax1(dble(y),z)
@@ -741,7 +774,7 @@ c
               y=abs(y)
               z=dmax1(dble(y),z)
             endif
-            do 99 l=-mu,mu
+            do l=-mu,mu
               if (l.eq.0) goto 99
               a1=in(2,l)
               d1=in(1,l)
@@ -770,12 +803,13 @@ c
               y=((g1/d1-d1/a1)/((1-g1/d1)**2)*(g1/u3(l)))
               y=abs(y)
               z=dmax1(dble(y),z)
+            end do
   99        continue
 
           if(z.lt.0.01) then
 c
 c     successful test (geometrical serie)
-            do 606 l=-mu,mu
+            do l=-mu,mu
               y1=1.
               d1=in(1,l)
               if(abs(d1).le.acu) go to 605
@@ -800,6 +834,7 @@ c     successful test (geometrical serie)
               y1=1-g1/d1
               g1=g1/y1
               u3(l)=u3(l)+g1
+            end do
   606       continue
             y1=1.
             d1=roIavion(1)
@@ -836,11 +871,11 @@ c     successful test (geometrical serie)
 c
 c     in(2,?) is the (n-2)ieme scattering order
 c
-          do 26 k=-mu,mu
+          do k=-mu,mu
             in(2,k)=in(1,k)
             qn(2,k)=qn(1,k)
             un(2,k)=un(1,k)
-   26     continue
+          end do
           roIavion(2)=roIavion(1)
           roQavion(2)=roQavion(1)
           roUavion(2)=roUavion(1)
@@ -848,28 +883,28 @@ c
 c
 c     in(1,?) is the (n-1)ieme scattering order
 c
-        do 27 k=-mu,mu
+        do k=-mu,mu
           in(1,k)=in(0,k)
           qn(1,k)=qn(0,k)
           un(1,k)=un(0,k)
-   27   continue
+        end do
         roIavion(1)=roIavion(0)
         roQavion(1)=roQavion(0)
         roUavion(1)=roUavion(0)
 c
 c     sum of the n-1 orders
-        do 610 l=-mu,mu
+        do l=-mu,mu
           i3(l)=i3(l)+in(0,l)
           q3(l)=q3(l)+qn(0,l)
           u3(l)=u3(l)+un(0,l)
-  610   continue
+        end do
         roIavion(-1)=roIavion(-1)+roIavion(0)
         roQavion(-1)=roQavion(-1)+roQavion(0)
         roUavion(-1)=roUavion(-1)+roUavion(0)
 c
 c     stop if order n is less than 1% of the sum
           z=0.
-          do 612 l=-mu,mu
+          do l=-mu,mu
             if (abs(i3(l)).ge.acu) then
               y=abs(in(0,l)/i3(l))
               z=dmax1(z,dble(y))
@@ -882,7 +917,7 @@ c     stop if order n is less than 1% of the sum
               y=abs(un(0,l)/u3(l))
               z=dmax1(z,dble(y))
             endif
-  612     continue
+          end do
 c       if(z.lt.0.00001) go to 505   ###originally
 c       if(z.lt.0.001) go to 505     ###6sV4.0 choice
 c        if(z.lt.0.01) go to 505 
@@ -892,25 +927,30 @@ c
 c      stop if order n is greater than 20 in any case
 c       WRITE(6,*) "WRITE WARNING PRIMARY SCATTERING"
 c       goto 505
-        if(ig-igmax) 503,503,505
+        if(ig-igmax < 0) then
+            go to 503
+        else if (ig-igmax ==0) then
+            go to 503
+        else
+            go to 505
+        end if
   505   continue
 c
 c     sum of the fourier component s
 c
         delta0s=1
         if(is.ne.0) delta0s=2
-        do 613 l=-mu,mu
+        do l=-mu,mu
           i4(l)=i4(l)+abs(delta0s*i3(l))
           q4(l)=q4(l)+abs(q3(l))
           u4(l)=u4(l)+abs(u3(l))
-  613   continue
+        end do
 c
 c     stop of the fourier decomposition
 c
-
-        do 614 l=1,np
+        do l=1,np
           phi=rp(l)
-          do 614 m=-mum1,mum1
+          do m=-mum1,mum1
             if(m.gt.0) then
               xli(m,l)=xli(m,l)+delta0s*i3(m)*cos(is*(phi+pi))
               xlq(m,l)=xlq(m,l)+delta0s*q3(m)*cos(is*(phi+pi))
@@ -920,9 +960,8 @@ c
               xlq(m,l)=xlq(m,l)+delta0s*q3(m)*cos(is*phi)
               xlu(m,l)=xlu(m,l)+delta0s*u3(m)*sin(is*phi)
             endif
-
- 614    continue
- 
+          end do
+        end do
  
 C Look up table generation 
       do m=1,mu

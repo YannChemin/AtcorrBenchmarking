@@ -1122,15 +1122,16 @@ c************** MIE (phase fun uh) ***************
 
       vi_m=0.00182737305
       vi(2)=vi_m
-      do 1 i=1,20
-       asy(2,i)=asy_m(i)
-       ex(2,i)=ex_m(i)
-       sc(2,i)=sc_m(i)
-      do 1 j=1,nquad
-      ph(i,j)=phr(i,j)
-      qh(i,j)=qhr(i,j)
-      uh(i,j)=uhr(i,j)
-    1 continue
+      do i=1,20
+        asy(2,i)=asy_m(i)
+        ex(2,i)=ex_m(i)
+        sc(2,i)=sc_m(i)
+        do j=1,nquad
+            ph(i,j)=phr(i,j)
+            qh(i,j)=qhr(i,j)
+            uh(i,j)=uhr(i,j)
+        end do
+      end do
       return
       end
 

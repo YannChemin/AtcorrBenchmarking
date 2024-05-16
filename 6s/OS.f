@@ -97,15 +97,15 @@ c ntp local variable: if ntp=nt     no plane observation selected
 c                        ntp=nt-1   plane observation selected
 c     it's a mixing rayleigh+aerosol
       if(palt.le.900..and.palt.gt.0.0) then
-      if (tap.gt.1.e-03) then
+        if (tap.gt.1.e-03) then
          ha=-palt/log(tap/ta)
-         else
+        else
          ha=2.
-         endif
-      ntp=nt-1
+        endif
+        ntp=nt-1
       else
-      ha=2.0
-      ntp=nt
+        ha=2.0
+        ntp=nt
       endif
 c
       xmus=-rm(0)
@@ -116,72 +116,72 @@ c case 2: pure aerosol
 c case 3: mixing rayleigh-aerosol
 c
       if((ta.le.accu2).and.(tr.gt.ta)) then
-      do j=0,ntp
-      h(j)=j*tr/ntp
-      ch(j)=exp(-h(j)/xmus)/2.
-      ydel(j)=1.0
-      xdel(j)=0.0
-      if (j.eq.0) then
-         altc(j)=300.
-         else
-         altc(j)=-log(h(j)/tr)*hr
-         endif
-      enddo
+        do j=0,ntp
+            h(j)=j*tr/ntp
+            ch(j)=exp(-h(j)/xmus)/2.
+            ydel(j)=1.0
+            xdel(j)=0.0
+            if (j.eq.0) then
+                altc(j)=300.
+            else
+                altc(j)=-log(h(j)/tr)*hr
+            endif
+        enddo
       endif
       if((tr.le.accu2).and.(ta.gt.tr)) then
-      do j=0,ntp
-      h(j)=j*ta/ntp
-      ch(j)=exp(-h(j)/xmus)/2.
-      ydel(j)=0.0
-      xdel(j)=piz
-      if (j.eq.0) then
-         altc(j)=300.
-         else
-         altc(j)=-log(h(j)/ta)*ha
-         endif
-      enddo
+        do j=0,ntp
+            h(j)=j*ta/ntp
+            ch(j)=exp(-h(j)/xmus)/2.
+            ydel(j)=0.0
+            xdel(j)=piz
+            if (j.eq.0) then
+                altc(j)=300.
+            else
+                altc(j)=-log(h(j)/ta)*ha
+            endif
+        enddo
       endif
 c
       if(tr.gt.accu2.and.ta.gt.accu2.and.iaer_prof.eq.0)then
-      ydel(0)=1.0
-      xdel(0)=0.0
-      h(0)=0.
-      ch(0)=0.5
-      altc(0)=300.
-      zx=300.
-      iplane=0
-      do 14 it=0,ntp
-      if (it.eq.0) then
-         yy=0.
-         dd=0.
-         goto 111
-      endif
-      yy=h(it-1)
-      dd=ydel(it-1)
- 111  ppp2=300.0
-      ppp1=0.0
-      itp=it
-      call discre(ta,ha,tr,hr,itp,ntp,yy,dd,ppp2,ppp1,
-     s    zx)
-      if(ier)return
-      xx=-zx/ha
-      if (xx.le.-20) then
-         ca=0.
-         else
-         ca=ta*dexp(xx)
-         endif
-      xx=-zx/hr
-      cr=tr*dexp(xx)
-      h(it)=cr+ca
-      altc(it)=zx
-      ch(it)=exp(-h(it)/xmus)/2.
-      cr=cr/hr
-      ca=ca/ha
-      ratio=cr/(cr+ca)
-      xdel(it)=(1.e+00-ratio)*piz
-      ydel(it)=ratio
-c     print *,'discre ',it,cr,ca,xdel(it),ydel(it),zx
-  14  continue
+        ydel(0)=1.0
+        xdel(0)=0.0
+        h(0)=0.
+        ch(0)=0.5
+        altc(0)=300.
+        zx=300.
+        iplane=0
+        do it=0,ntp
+            if (it.eq.0) then
+                yy=0.
+                dd=0.
+                goto 111
+            endif
+            yy=h(it-1)
+            dd=ydel(it-1)
+ 111        ppp2=300.0
+            ppp1=0.0
+            itp=it
+            call discre(ta,ha,tr,hr,itp,ntp,yy,dd,ppp2,ppp1,
+     s      zx)
+            if(ier)return
+            xx=-zx/ha
+            if (xx.le.-20) then
+                ca=0.
+            else
+                ca=ta*dexp(xx)
+            endif
+            xx=-zx/hr
+            cr=tr*dexp(xx)
+            h(it)=cr+ca
+            altc(it)=zx
+            ch(it)=exp(-h(it)/xmus)/2.
+            cr=cr/hr
+            ca=ca/ha
+            ratio=cr/(cr+ca)
+            xdel(it)=(1.e+00-ratio)*piz
+            ydel(it)=ratio
+c           print *,'discre ',it,cr,ca,xdel(it),ydel(it),zx
+        end do
       endif
 
       if(tr.gt.acu2.and.ta.gt.acu2.and.iaer_prof.eq.1)then
@@ -246,20 +246,22 @@ c     enddo
 c
       pi=acos(-1.)
       phi=phirad
-      do 615 l=1,np
-      do 615 m=-mu,mu
- 615  xl(m,l)=0.
+      do l=1,np
+        do m=-mu,mu
+            xl(m,l)=0.
+        end do
+      end do
       do ifi=1,nfi
-      xlphim(ifi)=0.
+        xlphim(ifi)=0.
       enddo
       
 CCC initialization of look up table variable
       do i=1,mu
-      nfilut(i)=0
-      do j=1,61
-      rolut(i,j)=0.
-      filut(i,j)=0.
-      enddo
+        nfilut(i)=0
+        do j=1,61
+            rolut(i,j)=0.
+            filut(i,j)=0.
+        enddo
       enddo
       its=acos(xmus)*180.0/pi
       do i=1,mu
@@ -271,12 +273,12 @@ CCC initialization of look up table variable
          nfilut(i)=nbisca
          filut(i,1)=0.0
          filut(i,nbisca)=180.0
-	 scaa=iscama
+         scaa=iscama
          do j=2,nfilut(i)-1
           scaa=scaa-4.0
           cscaa=cos(scaa*pi/180.)
           cfi=-(cscaa+xmus*lutmuv)/(sqrt(1-xmus*xmus)
-     S	  *sqrt(1.-lutmuv*lutmuv))
+     S    *sqrt(1.-lutmuv*lutmuv))
           filut(i,j)=acos(cfi)*180.0/pi
          enddo
       enddo
@@ -311,9 +313,9 @@ c
 c
 c     fourier decomposition
 c
-      do 17 j=-mu,mu
-      i4(j)=0.
-   17 continue
+      do j=-mu,mu
+        i4(j)=0.
+      end do
       iborm=nbmu-3
       if( abs (xmus-1.000000) .lt.1.e-06)iborm=0
       do 24 is=0,iborm
@@ -325,83 +327,98 @@ c
       roavion1=0.
       roavion2=0.
       roavion=0.
-      do 16 j=-mu,mu
-      i3(j)=0.
-   16 continue
+      do j=-mu,mu
+        i3(j)=0.
+      end do
 c
 c     kernel computations
 c
       isp=is
       call kernel(isp,mu,rm,xpl,psl,bp)
       if(is.gt.0)beta0=0.
-      do 100 j=-mu,mu
-      if(is-2)200,200,201
- 200  spl=xpl(0)
-      sa1=beta0+beta2*xpl(j)*spl
-      sa2=bp(0,j)
-      goto 202
- 201  sa2=bp(0,j)
-      sa1=0.
+      do j=-mu,mu
+        if (is-2 < 0) then
+            goto 200
+        else if (is-2 == 0) then
+            goto 200
+        else
+            goto 201
+        end if
+ 200    spl=xpl(0)
+        sa1=beta0+beta2*xpl(j)*spl
+        sa2=bp(0,j)
+        goto 202
+ 201    sa2=bp(0,j)
+        sa1=0.
 c
 c     primary scattering source function at every level within the layer
 c
- 202  do 101 k=0,nt
-      c=ch(k)
-      a=ydel(k)
-      b=xdel(k)
-      i2(k,j)=c*(sa2*b+sa1*a)
-  101 continue
-  100 continue
+ 202    do k=0,nt
+            c=ch(k)
+            a=ydel(k)
+            b=xdel(k)
+            i2(k,j)=c*(sa2*b+sa1*a)
+        end do
+      end do
 c
 c     vertical integration, primary upward radiation
 c
  
-      do 108 k=1,mu
-      i1(nt,k)=0.
-      zi1=i1(nt,k)
-      yy=rm(k)
-      do 108 i=nt-1,0,-1
-      jj=i+1
-      f=h(jj)-h(i)
-      a=(i2(jj,k)-i2(i,k))/f
-      b=i2(i,k)-a*h(i)
-      c=exp(-f/yy)
-      d=1.0e+00-c
-      xx=h(i)-h(jj)*c
-      zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
-      i1(i,k)=zi1
-  108 continue
+      do k=1,mu
+        i1(nt,k)=0.
+        zi1=i1(nt,k)
+        yy=rm(k)
+        do i=nt-1,0,-1
+            jj=i+1
+            f=h(jj)-h(i)
+            a=(i2(jj,k)-i2(i,k))/f
+            b=i2(i,k)-a*h(i)
+            c=exp(-f/yy)
+            d=1.0e+00-c
+            xx=h(i)-h(jj)*c
+            zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
+            i1(i,k)=zi1
+        end do
+      end do
 c
 c     vertical integration, primary downward radiation
 c
-      do 109 k=-mu,-1
-      i1(0,k)=0.
-      zi1=i1(0,k)
-      yy=rm(k)
-      do 109 i=1,nt
-      jj=i-1
-      f=h(i)-h(jj)
-      c=exp(f/yy)
-      d=1.0e+00-c
-      a=(i2(i,k)-i2(jj,k))/f
-      b=i2(i,k)-a*h(i)
-      xx=h(i)-h(jj)*c
-      zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
-      i1(i,k)=zi1
-  109 continue
+      do k=-mu,-1
+        i1(0,k)=0.
+        zi1=i1(0,k)
+        yy=rm(k)
+        do i=1,nt
+            jj=i-1
+            f=h(i)-h(jj)
+            c=exp(f/yy)
+            d=1.0e+00-c
+            a=(i2(i,k)-i2(jj,k))/f
+            b=i2(i,k)-a*h(i)
+            xx=h(i)-h(jj)*c
+            zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
+            i1(i,k)=zi1
+        end do
+      end do
 c
 c     inm2 is inialized with scattering computed at n-2
 c     i3 is inialized with primary scattering
 c
-      do 20 k=-mu,mu
-      if(k) 21,20,23
-   21 index=nt
-      go to 25
-   23 index=0
-   25 continue
-      inm1(k)=i1(index,k)
-      inm2(k)=i1(index,k)
-      i3(k)=i1(index,k)
+      do k=-mu,mu
+          if (k < 0) then
+            goto 21
+          else if (k == 0) then
+            goto 20
+          else
+            goto 23
+          end if
+   21   index=nt
+        go to 25
+   23   index=0
+   25   continue
+        inm1(k)=i1(index,k)
+        inm2(k)=i1(index,k)
+        i3(k)=i1(index,k)
+      end do
    20 continue
       roavion2=i1(iplane,mu)
       roavion=i1(iplane,mu)
@@ -418,217 +435,243 @@ c
 c     if is < ou = 2 kernels are a mixing of aerosols and molecules kern
 c     if is >2 aerosols kernels only
 c
-      if(is-2)210,210,211
-  210 do455 k=1,mu
-      xpk=xpl(k)
-      ypk=xpl(-k)
-      do 455 i=0,nt
-      ii1=0.
-      ii2=0.
-      x=xdel(i)
-      y=ydel(i)
-      do477 j=1,mu
-      xpj=xpl(j)
-      z=gb(j)
-      xi1=i1(i,j)
-      xi2=i1(i,-j)
-      bpjk=bp(j,k)*x+y*(beta0+beta2*xpj*xpk)
-      bpjmk=bp(j,-k)*x+y*(beta0+beta2*xpj*ypk)
-      xdb=z*(xi1*bpjk+xi2*bpjmk)
-      ii2=ii2+xdb
-      xdb=z*(xi1*bpjmk+xi2*bpjk)
-      ii1=ii1+xdb
- 477  continue
-      if (abs(ii2).lt.1.E-30) ii2=0.
-      if (abs(ii1).lt.1.E-30) ii1=0.
-      i2(i,k)=ii2
-      i2(i,-k)=ii1
- 455  continue
+      if (is-2 < 0) then
+        goto 210
+      else if (is-2 == 0) then
+        goto 210
+      else
+        goto 211
+      end if
+  210 do k=1,mu
+        xpk=xpl(k)
+        ypk=xpl(-k)
+        do i=0,nt
+            ii1=0.
+            ii2=0.
+            x=xdel(i)
+            y=ydel(i)
+            do j=1,mu
+                xpj=xpl(j)
+                z=gb(j)
+                xi1=i1(i,j)
+                xi2=i1(i,-j)
+                bpjk=bp(j,k)*x+y*(beta0+beta2*xpj*xpk)
+                bpjmk=bp(j,-k)*x+y*(beta0+beta2*xpj*ypk)
+                xdb=z*(xi1*bpjk+xi2*bpjmk)
+                ii2=ii2+xdb
+                xdb=z*(xi1*bpjmk+xi2*bpjk)
+                ii1=ii1+xdb
+            end do
+            if (abs(ii2).lt.1.E-30) ii2=0.
+            if (abs(ii1).lt.1.E-30) ii1=0.
+            i2(i,k)=ii2
+            i2(i,-k)=ii1
+        end do
+      end do
       goto 213
- 211  do45 k=1,mu
-      do 45 i=0,nt
-      ii1=0.
-      ii2=0.
-      x=xdel(i)
-      do47 j=1,mu
-      z=gb(j)
-      xi1=i1(i,j)
-      xi2=i1(i,-j)
-      bpjk=bp(j,k)*x
-      bpjmk=bp(j,-k)*x
-      xdb=z*(xi1*bpjk+xi2*bpjmk)
-      ii2=ii2+xdb
-      xdb=z*(xi1*bpjmk+xi2*bpjk)
-      ii1=ii1+xdb
-   47 continue
-      if (abs(ii2).lt.1.E-30) ii2=0.
-      if (abs(ii1).lt.1.E-30) ii1=0.
-      i2(i,k)=ii2
-      i2(i,-k)=ii1
-   45 continue
+ 211  do k=1,mu
+        do i=0,nt
+            ii1=0.
+            ii2=0.
+            x=xdel(i)
+            do j=1,mu
+                z=gb(j)
+                xi1=i1(i,j)
+                xi2=i1(i,-j)
+                bpjk=bp(j,k)*x
+                bpjmk=bp(j,-k)*x
+                xdb=z*(xi1*bpjk+xi2*bpjmk)
+                ii2=ii2+xdb
+                xdb=z*(xi1*bpjmk+xi2*bpjk)
+                ii1=ii1+xdb
+            end do
+            if (abs(ii2).lt.1.E-30) ii2=0.
+            if (abs(ii1).lt.1.E-30) ii1=0.
+            i2(i,k)=ii2
+            i2(i,-k)=ii1
+        end do
+      end do
 c
 c     vertical integration, upward radiation
 c
- 213  do 48 k=1,mu
-      i1(nt,k)=0.
-      zi1=i1(nt,k)
-      yy=rm(k)
-      do 48 i=nt-1,0,-1
-      jj=i+1
-      f=h(jj)-h(i)
-      a=(i2(jj,k)-i2(i,k))/f
-      b=i2(i,k)-a*h(i)
-      c=exp(-f/yy)
-      d=1.e+00-c
-      xx=h(i)-h(jj)*c
-      zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
-      if (abs(zi1).le.1.E-20) zi1=0.
-      i1(i,k)=zi1
-   48 continue
+ 213  do k=1,mu
+        i1(nt,k)=0.
+        zi1=i1(nt,k)
+        yy=rm(k)
+        do i=nt-1,0,-1
+            jj=i+1
+            f=h(jj)-h(i)
+            a=(i2(jj,k)-i2(i,k))/f
+            b=i2(i,k)-a*h(i)
+            c=exp(-f/yy)
+            d=1.e+00-c
+            xx=h(i)-h(jj)*c
+            zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
+            if (abs(zi1).le.1.E-20) zi1=0.
+            i1(i,k)=zi1
+        end do
+      end do
 c
 c     vertical integration, downward radiation
 c
-      do 50 k=-mu,-1
-      i1(0,k)=0.
-      zi1=i1(0,k)
-      yy=rm(k)
-      do 50 i=1,nt
-      jj=i-1
-      f=h(i)-h(jj)
-      c=exp(f/yy)
-      d=1.e+00-c
-      a=(i2(i,k)-i2(jj,k))/f
-      b=i2(i,k)-a*h(i)
-      xx=h(i)-h(jj)*c
-      zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
-      if (abs(zi1).le.1.E-20) zi1=0.
-      i1(i,k)=zi1
-   50 continue
+      do k=-mu,-1
+        i1(0,k)=0.
+        zi1=i1(0,k)
+        yy=rm(k)
+        do i=1,nt
+            jj=i-1
+            f=h(i)-h(jj)
+            c=exp(f/yy)
+            d=1.e+00-c
+            a=(i2(i,k)-i2(jj,k))/f
+            b=i2(i,k)-a*h(i)
+            xx=h(i)-h(jj)*c
+            zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
+            if (abs(zi1).le.1.E-20) zi1=0.
+            i1(i,k)=zi1
+        end do
+      end do
 c
 c     in is the nieme scattering order
 c
-      do 30 k=-mu,mu
-      if(k) 31,30,33
-   31 index=nt
-      go to 34
-   33 index=0
-   34 continue
-      in(k)=i1(index,k)
+      do k=-mu,mu
+        if (k < 0) then
+            goto 31
+        else if (k == 0) then
+            goto 30
+        else
+            goto 33
+        end if
+   31   index=nt
+        go to 34
+   33   index=0
+   34   continue
+        in(k)=i1(index,k)
+      end do
    30 continue
       roavion0=i1(iplane,mu)
 c
 c   convergence test (geometrical serie)
 c
       if(ig.gt.2) then
-      z=0.
-      a1=roavion2
-      d1=roavion1
-      g1=roavion0
-      if(a1.ge.accu.and.d1.ge.accu.and.roavion.ge.accu) then
-      y=((g1/d1-d1/a1)/((1-g1/d1)**2)*(g1/roavion))
-      y=abs(y)
-      z=dmax1(dble(y),z)
+        z=0.
+        a1=roavion2
+        d1=roavion1
+        g1=roavion0
+        if(a1.ge.accu.and.d1.ge.accu.and.roavion.ge.accu) then
+        y=((g1/d1-d1/a1)/((1-g1/d1)**2)*(g1/roavion))
+        y=abs(y)
+        z=dmax1(dble(y),z)
       endif
-      do 99 l=-mu,mu
-      if (l.eq.0) goto 99
-      a1=inm2(l)
-      d1=inm1(l)
-      g1=in(l)
-      if(a1.le.accu) go to 99
-      if(d1.le.accu) go to 99
-      if(i3(l).le.accu) go to 99
-      y=((g1/d1-d1/a1)/((1-g1/d1)**2)*(g1/i3(l)))
-      y=abs(y)
-      z=dmax1(dble(y),z)
+      do l=-mu,mu
+        if (l.eq.0) goto 99
+        a1=inm2(l)
+        d1=inm1(l)
+        g1=in(l)
+        if(a1.le.accu) go to 99
+        if(d1.le.accu) go to 99
+        if(i3(l).le.accu) go to 99
+        y=((g1/d1-d1/a1)/((1-g1/d1)**2)*(g1/i3(l)))
+        y=abs(y)
+        z=dmax1(dble(y),z)
+      end do
   99  continue
       if(z.lt.0.0001) then
 c
 c     successful test (geometrical serie)
 c
-      do 606 l=-mu,mu
-      y1=1.
-      d1=inm1(l)
-      g1=in(l)
-      if(d1.le.accu) go to 606
-      y1=1-g1/d1
-      if(abs(g1-d1).le.accu) then
-      go to 606
-      endif
-      g1=g1/y1
-      i3(l)=i3(l)+g1
-  606 continue
-      d1=roavion1
-      g1=roavion0
-      y1=1.
-      if(d1.ge.accu) then
-      if(abs(g1-d1).ge.accu) then
-      y1=1-g1/d1
-      g1=g1/y1
-      endif
-      roavion=roavion+g1
-      endif
-      go to 505
+        do l=-mu,mu
+            y1=1.
+            d1=inm1(l)
+            g1=in(l)
+            if(d1.le.accu) go to 606
+            y1=1-g1/d1
+            if(abs(g1-d1).le.accu) then
+                go to 606
+            endif
+            g1=g1/y1
+            i3(l)=i3(l)+g1
+        end do
+  606   continue
+        d1=roavion1
+        g1=roavion0
+        y1=1.
+        if(d1.ge.accu) then
+            if(abs(g1-d1).ge.accu) then
+                y1=1-g1/d1
+                g1=g1/y1
+            endif
+            roavion=roavion+g1
+        endif
+        go to 505
       endif
 c
 c     inm2 is the (n-2)ieme scattering order
 c
-      do 26 k=-mu,mu
-      inm2(k)=inm1(k)
-   26 continue
+      do k=-mu,mu
+        inm2(k)=inm1(k)
+      end do
       roavion2=roavion1
       endif
 c
 c     inm1 is the (n-1)ieme scattering order
 c
-      do 27 k=-mu,mu
-      inm1(k)=in(k)
-   27 continue
+      do  k=-mu,mu
+        inm1(k)=in(k)
+      end do
       roavion1=roavion0
 c
 c     sum of the n-1 orders
 c
-      do 610 l=-mu,mu
-      i3(l)=i3(l)+in(l)
-  610 continue
+      do l=-mu,mu
+        i3(l)=i3(l)+in(l)
+      end do
       roavion=roavion+roavion0
 c
 c     stop if order n is less than 1% of the sum
 c
       z=0.
-      do 611 l=-mu,mu
-      if (abs(i3(l)).ge.accu) then
-      y=abs(in(l)/i3(l))
-      z=dmax1(z,dble(y))
-      endif
-  611 continue
+      do l=-mu,mu
+        if (abs(i3(l)).ge.accu) then
+            y=abs(in(l)/i3(l))
+            z=dmax1(z,dble(y))
+        endif
+      end do
 
 c     if(z.lt.0.00001) go to 505    # 6SV4.0 choice
       if(z.lt.0.00001) go to 505
 c
 c      stop if order n is greater than 20 in any case
 c
-      if(ig-igmax) 503,503,505
+      if (ig-igmax < 0) then
+        goto 503
+      else if (ig-igmax == 0) then
+        goto 503
+      else
+        goto 505
+      end if
   505 continue
 c
 c     sum of the fourier component s
 c
       delta0s=1
       if(is.ne.0) delta0s=2
-      do 612 l=-mu,mu
-      i4(l)=i4(l)+delta0s*i3(l)
-  612 continue
+      do l=-mu,mu
+        i4(l)=i4(l)+delta0s*i3(l)
+      end do
 c
 c     stop of the fourier decomposition
 c
-      do 614 l=1,np
-      phi=rp(l)
-      do 614 m=-mum1,mum1
-      if(m.gt.0) then
-      xl(m,l)=xl(m,l)+delta0s*i3(m)*cos(is*(phi+pi))
-      else
-      xl(m,l)=xl(m,l)+delta0s*i3(m)*cos(is*phi)
-      endif
- 614  continue
+      do l=1,np
+        phi=rp(l)
+        do m=-mum1,mum1
+            if(m.gt.0) then
+                xl(m,l)=xl(m,l)+delta0s*i3(m)*cos(is*(phi+pi))
+            else
+                xl(m,l)=xl(m,l)+delta0s*i3(m)*cos(is*phi)
+            endif
+        end do
+      end do
  
 C Look up table generation 
       do m=1,mu

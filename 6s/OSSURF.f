@@ -254,11 +254,13 @@ c      enddo
 c
       pi=acos(-1.)
       phi=phirad
-      do 615 l=1,np
-      do 615 m=-mu,mu
- 615  xl(m,l)=0.
+      do l=1,np
+        do m=-mu,mu
+            xl(m,l)=0.
+        end do
+      end do
       do ifi=1,nfi
-      xlphim(ifi)=0.
+        xlphim(ifi)=0.
       enddo
       
 CCC initialization of look up table variable
@@ -328,22 +330,22 @@ c      enddo
 c      enddo
 c      enddo
 c
-      do 17 j=-mu,mu
-      i4(j)=0.
-   17 continue
+      do j=-mu,mu
+        i4(j)=0.
+      end do
       iborm=nbmu-3
       if( abs (xmus-1.000000) .lt.1.e-06)iborm=0
       do 24 is=0,iborm
 c
 c compute fourier component of the surface term for is=0
       do i=0,mu
-      do j=1,mu
-      srosur(i,j)=0.0
-      do k=1,83
-      srosur(i,j)=srosur(i,j)+2.*rosur(i,j,k)*wfisur(k)*cos(is*fisur(k))
-      enddo
-      srosur(i,j)=srosur(i,j)/pisp
-      enddo
+        do j=1,mu
+            srosur(i,j)=0.0
+            do k=1,83
+                srosur(i,j)=srosur(i,j)+2.*rosur(i,j,k)*wfisur(k)*cos(is*fisur(k))
+            enddo
+            srosur(i,j)=srosur(i,j)/pisp
+        enddo
       enddo
       
 c    primary scattering
@@ -353,83 +355,97 @@ c
       roavion1=0.
       roavion2=0.
       roavion=0.
-      do 16 j=-mu,mu
-      i3(j)=0.
-   16 continue
+      do j=-mu,mu
+        i3(j)=0.
+      end do
 c
 c     kernel computations
 c
       isp=is
       call kernel(isp,mu,rm,xpl,psl,bp)
       if(is.gt.0)beta0=0.
-      do 100 j=-mu,mu
-      if(is-2)200,200,201
- 200  spl=xpl(0)
-      sa1=beta0+beta2*xpl(j)*spl
-      sa2=bp(0,j)
-      goto 202
- 201  sa2=bp(0,j)
-      sa1=0.
+      do j=-mu,mu
+        if (is-2 < 0) then
+            goto 200
+        else if (is-2 == 0) then
+            goto 200
+        else
+            goto 201
+        end if
+ 200    spl=xpl(0)
+        sa1=beta0+beta2*xpl(j)*spl
+        sa2=bp(0,j)
+        goto 202
+ 201    sa2=bp(0,j)
+        sa1=0.
 c
 c     primary scattering source function at every level within the layer
 c
- 202  do 101 k=0,nt
-      c=ch(k)
-      a=ydel(k)
-      b=xdel(k)
-      i2(k,j)=c*(sa2*b+sa1*a)
-  101 continue
-  100 continue
+ 202    do k=0,nt
+            c=ch(k)
+            a=ydel(k)
+            b=xdel(k)
+            i2(k,j)=c*(sa2*b+sa1*a)
+        end do
+      end do
 c
 c     vertical integration, primary upward radiation
 c
- 
-      do 108 k=1,mu
-      i1(nt,k)=srosur(0,k)*xmus*exp(-h(nt)/xmus)/2.0
-      zi1=i1(nt,k)
-      yy=rm(k)
-      do 108 i=nt-1,0,-1
-      jj=i+1
-      f=h(jj)-h(i)
-      a=(i2(jj,k)-i2(i,k))/f
-      b=i2(i,k)-a*h(i)
-      c=exp(-f/yy)
-      d=1.0e+00-c
-      xx=h(i)-h(jj)*c
-      zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
-      i1(i,k)=zi1
-  108 continue
+      do k=1,mu
+        i1(nt,k)=srosur(0,k)*xmus*exp(-h(nt)/xmus)/2.0
+        zi1=i1(nt,k)
+        yy=rm(k)
+        do i=nt-1,0,-1
+            jj=i+1
+            f=h(jj)-h(i)
+            a=(i2(jj,k)-i2(i,k))/f
+            b=i2(i,k)-a*h(i)
+            c=exp(-f/yy)
+            d=1.0e+00-c
+            xx=h(i)-h(jj)*c
+            zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
+            i1(i,k)=zi1
+        end do
+      end do
 c
 c     vertical integration, primary downward radiation
 c
-      do 109 k=-mu,-1
-      i1(0,k)=0.
-      zi1=i1(0,k)
-      yy=rm(k)
-      do 109 i=1,nt
-      jj=i-1
-      f=h(i)-h(jj)
-      c=exp(f/yy)
-      d=1.0e+00-c
-      a=(i2(i,k)-i2(jj,k))/f
-      b=i2(i,k)-a*h(i)
-      xx=h(i)-h(jj)*c
-      zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
-      i1(i,k)=zi1
-  109 continue
+      do k=-mu,-1
+        i1(0,k)=0.
+        zi1=i1(0,k)
+        yy=rm(k)
+        do i=1,nt
+            jj=i-1
+            f=h(i)-h(jj)
+            c=exp(f/yy)
+            d=1.0e+00-c
+            a=(i2(i,k)-i2(jj,k))/f
+            b=i2(i,k)-a*h(i)
+            xx=h(i)-h(jj)*c
+            zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
+            i1(i,k)=zi1
+        end do
+      end do
 c
 c     inm2 is inialized with scattering computed at n-2
 c     i3 is inialized with primary scattering
 c
-      do 20 k=-mu,mu
-      if(k) 21,20,23
-   21 index=nt
-      go to 25
-   23 index=0
-   25 continue
-      inm1(k)=i1(index,k)
-      inm2(k)=i1(index,k)
-      i3(k)=i1(index,k)
+      do k=-mu,mu
+        if (k < 0) then
+          goto 21
+        else if (k == 0) then
+          goto 20
+        else
+          goto 23
+        end if
+   21   index=nt
+        go to 25
+   23   index=0
+   25   continue
+        inm1(k)=i1(index,k)
+        inm2(k)=i1(index,k)
+        i3(k)=i1(index,k)
+      end do
    20 continue
       roavion2=i1(iplane,mu)
       roavion=i1(iplane,mu)
@@ -446,101 +462,117 @@ c
 c     if is < ou = 2 kernels are a mixing of aerosols and molecules kern
 c     if is >2 aerosols kernels only
 c
-      if(is-2)210,210,211
-  210 do455 k=1,mu
-      xpk=xpl(k)
-      ypk=xpl(-k)
-      do 455 i=0,nt
-      ii1=0.
-      ii2=0.
-      x=xdel(i)
-      y=ydel(i)
-      do477 j=1,mu
-      xpj=xpl(j)
-      z=gb(j)
-      xi1=i1(i,j)
-      xi2=i1(i,-j)
-      bpjk=bp(j,k)*x+y*(beta0+beta2*xpj*xpk)
-      bpjmk=bp(j,-k)*x+y*(beta0+beta2*xpj*ypk)
-      xdb=z*(xi1*bpjk+xi2*bpjmk)
-      ii2=ii2+xdb
-      xdb=z*(xi1*bpjmk+xi2*bpjk)
-      ii1=ii1+xdb
- 477  continue
-      if (abs(ii2).lt.1.E-30) ii2=0.
-      if (abs(ii1).lt.1.E-30) ii1=0.
-      i2(i,k)=ii2
-      i2(i,-k)=ii1
- 455  continue
+      if (is-2 < 0) then
+        goto 210
+      else if (is-2 == 0) then
+        goto 210
+      else
+        goto 211
+      end if
+  210 do k=1,mu
+        xpk=xpl(k)
+        ypk=xpl(-k)
+        do i=0,nt
+            ii1=0.
+            ii2=0.
+            x=xdel(i)
+            y=ydel(i)
+            do j=1,mu
+                xpj=xpl(j)
+                z=gb(j)
+                xi1=i1(i,j)
+                xi2=i1(i,-j)
+                bpjk=bp(j,k)*x+y*(beta0+beta2*xpj*xpk)
+                bpjmk=bp(j,-k)*x+y*(beta0+beta2*xpj*ypk)
+                xdb=z*(xi1*bpjk+xi2*bpjmk)
+                ii2=ii2+xdb
+                xdb=z*(xi1*bpjmk+xi2*bpjk)
+                ii1=ii1+xdb
+            end do
+            if (abs(ii2).lt.1.E-30) ii2=0.
+            if (abs(ii1).lt.1.E-30) ii1=0.
+            i2(i,k)=ii2
+            i2(i,-k)=ii1
+        end do
+      end do
       goto 213
- 211  do45 k=1,mu
-      do 45 i=0,nt
-      ii1=0.
-      ii2=0.
-      x=xdel(i)
-      do47 j=1,mu
-      z=gb(j)
-      xi1=i1(i,j)
-      xi2=i1(i,-j)
-      bpjk=bp(j,k)*x
-      bpjmk=bp(j,-k)*x
-      xdb=z*(xi1*bpjk+xi2*bpjmk)
-      ii2=ii2+xdb
-      xdb=z*(xi1*bpjmk+xi2*bpjk)
-      ii1=ii1+xdb
-   47 continue
-      if (abs(ii2).lt.1.E-30) ii2=0.
-      if (abs(ii1).lt.1.E-30) ii1=0.
-      i2(i,k)=ii2
-      i2(i,-k)=ii1
-   45 continue
+ 211  do k=1,mu
+        do i=0,nt
+            ii1=0.
+            ii2=0.
+            x=xdel(i)
+            do j=1,mu
+                z=gb(j)
+                xi1=i1(i,j)
+                xi2=i1(i,-j)
+                bpjk=bp(j,k)*x
+                bpjmk=bp(j,-k)*x
+                xdb=z*(xi1*bpjk+xi2*bpjmk)
+                ii2=ii2+xdb
+                xdb=z*(xi1*bpjmk+xi2*bpjk)
+                ii1=ii1+xdb
+            end do
+            if (abs(ii2).lt.1.E-30) ii2=0.
+            if (abs(ii1).lt.1.E-30) ii1=0.
+            i2(i,k)=ii2
+            i2(i,-k)=ii1
+        end do
+      end do
 c
 c     vertical integration, upward radiation
 c
- 213  do 48 k=1,mu
-      i1(nt,k)=0.
+ 213  do k=1,mu
+        i1(nt,k)=0.
 c  the surface contribution at the boundary layer
-      do l=1,mu
-      i1(nt,k)=i1(nt,k)+2.*gb(l)*i1(nt,-l)*rm(l)*srosur(l,k)/2.0
-      enddo
-      zi1=i1(nt,k)
-      yy=rm(k)
-      do 48 i=nt-1,0,-1
-      jj=i+1
-      f=h(jj)-h(i)
-      a=(i2(jj,k)-i2(i,k))/f
-      b=i2(i,k)-a*h(i)
-      c=exp(-f/yy)
-      d=1.e+00-c
-      xx=h(i)-h(jj)*c
-      zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
-      if (abs(zi1).le.1.E-20) zi1=0.
-      i1(i,k)=zi1
-   48 continue
+        do l=1,mu
+            i1(nt,k)=i1(nt,k)+2.*gb(l)*i1(nt,-l)*rm(l)*srosur(l,k)/2.0
+        enddo
+        zi1=i1(nt,k)
+        yy=rm(k)
+        do i=nt-1,0,-1
+            jj=i+1
+            f=h(jj)-h(i)
+            a=(i2(jj,k)-i2(i,k))/f
+            b=i2(i,k)-a*h(i)
+            c=exp(-f/yy)
+            d=1.e+00-c
+            xx=h(i)-h(jj)*c
+            zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
+            if (abs(zi1).le.1.E-20) zi1=0.
+            i1(i,k)=zi1
+        end do
+      end do
 c
 c     vertical integration, downward radiation
 c
-      do 50 k=-mu,-1
-      i1(0,k)=0.
-      zi1=i1(0,k)
-      yy=rm(k)
-      do 50 i=1,nt
-      jj=i-1
-      f=h(i)-h(jj)
-      c=exp(f/yy)
-      d=1.e+00-c
-      a=(i2(i,k)-i2(jj,k))/f
-      b=i2(i,k)-a*h(i)
-      xx=h(i)-h(jj)*c
-      zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
-      if (abs(zi1).le.1.E-20) zi1=0.
-      i1(i,k)=zi1
-   50 continue
+      do k=-mu,-1
+        i1(0,k)=0.
+        zi1=i1(0,k)
+        yy=rm(k)
+        do i=1,nt
+            jj=i-1
+            f=h(i)-h(jj)
+            c=exp(f/yy)
+            d=1.e+00-c
+            a=(i2(i,k)-i2(jj,k))/f
+            b=i2(i,k)-a*h(i)
+            xx=h(i)-h(jj)*c
+            zi1=c*zi1+(d*(b+a*yy)+a*xx)*0.5e+00
+            if (abs(zi1).le.1.E-20) zi1=0.
+            i1(i,k)=zi1
+        end do
+      end do
 c
 c     in is the nieme scattering order
 c
       do 30 k=-mu,mu
-      if(k) 31,30,33
+      if (k < 0) then
+        goto 31
+      else if (k == 0) then
+        goto 30
+      else
+        goto 33
+      end if
    31 index=nt
       go to 34
    33 index=0
@@ -604,84 +636,89 @@ c
 c
 c     inm2 is the (n-2)ieme scattering order
 c
-      do 26 k=-mu,mu
-      inm2(k)=inm1(k)
-   26 continue
+      do k=-mu,mu
+        inm2(k)=inm1(k)
+      end do
       roavion2=roavion1
       endif
 c
 c     inm1 is the (n-1)ieme scattering order
 c
-      do 27 k=-mu,mu
-      inm1(k)=in(k)
-   27 continue
+      do k=-mu,mu
+        inm1(k)=in(k)
+      end do
       roavion1=roavion0
 c
 c     sum of the n-1 orders
 c
-      do 610 l=-mu,mu
-      i3(l)=i3(l)+in(l)
-  610 continue
+      do l=-mu,mu
+        i3(l)=i3(l)+in(l)
+      end do
       roavion=roavion+roavion0
 c
 c     stop if order n is less than 1% of the sum
 c
       z=0.
-      do 611 l=-mu,mu
-      if (abs(i3(l)).ge.accu) then
-      y=abs(in(l)/i3(l))
-      z=dmax1(z,dble(y))
-      endif
-  611 continue
+      do l=-mu,mu
+        if (abs(i3(l)).ge.accu) then
+            y=abs(in(l)/i3(l))
+            z=dmax1(z,dble(y))
+        endif
+      end do
 
 c     if(z.lt.0.00001) go to 505    # 6SV4.0 choice
       if(z.lt.0.00001) go to 505
 c
 c      stop if order n is greater than 20 in any case
 c
-      if(ig-igmax) 503,503,505
+      if(ig-igmax < 0) then
+        goto 503
+      else if (ig-igmax == 0) then
+        goto 503
+      else
+        goto 505
+      end if
   505 continue
 c
 c     sum of the fourier component s
 c
       delta0s=1
       if(is.ne.0) delta0s=2
-      do 612 l=-mu,mu
-      i4(l)=i4(l)+delta0s*i3(l)
-  612 continue
+      do l=-mu,mu
+        i4(l)=i4(l)+delta0s*i3(l)
+      end do
 c
 c     stop of the fourier decomposition
 c
-      do 614 l=1,np
-      phi=rp(l)
-      do 614 m=-mum1,mum1
-      if(m.gt.0) then
-      xl(m,l)=xl(m,l)+delta0s*i3(m)*cos(is*(phi+pi))
-      else
-      xl(m,l)=xl(m,l)+delta0s*i3(m)*cos(is*phi)
-      endif
- 614  continue
+      do l=1,np
+        phi=rp(l)
+        do m=-mum1,mum1
+            if(m.gt.0) then
+                xl(m,l)=xl(m,l)+delta0s*i3(m)*cos(is*(phi+pi))
+            else
+                xl(m,l)=xl(m,l)+delta0s*i3(m)*cos(is*phi)
+            endif
+        end do
+      end do
  
 C Look up table generation 
       do m=1,mu
-      do l=1,nfilut(m)
-      phimul=filut(m,l)*pi/180.
-      rolut(m,l)=rolut(m,l)+delta0s*i3(m)*cos(is*(phimul+pi))
-      enddo
+        do l=1,nfilut(m)
+            phimul=filut(m,l)*pi/180.
+            rolut(m,l)=rolut(m,l)+delta0s*i3(m)*cos(is*(phimul+pi))
+        enddo
       enddo
 C end of look up table generation 
  
- 
- 
       if(is.eq.0) then
-      do k=1,mum1
-      xl(0,1)=xl(0,1)+rm(k)*gb(k)*i3(-k)
-      enddo
+        do k=1,mum1
+            xl(0,1)=xl(0,1)+rm(k)*gb(k)*i3(-k)
+        enddo
       endif
       xl(mu,1)=xl(mu,1)+delta0s*i3(mu)*cos(is*(phirad+pi))
       do ifi=1,nfi
-      phimul=(ifi-1)*pi/(nfi-1)
-      xlphim(ifi)=xlphim(ifi)+delta0s*roavion*cos(is*(phimul+pi))
+        phimul=(ifi-1)*pi/(nfi-1)
+        xlphim(ifi)=xlphim(ifi)+delta0s*roavion*cos(is*(phimul+pi))
       enddo
       xl(-mu,1)=xl(-mu,1)+delta0s*roavion*cos(is*(phirad+pi))
       z=0.
