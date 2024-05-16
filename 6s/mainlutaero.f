@@ -980,7 +980,13 @@ c**********************************************************************c
       if (iaer_prof.eq.0) then
 
       read(iread,*) v
-      if(v) 71,10,11
+      if (v < 0) then
+        goto 71
+      else if (v == 0) then
+        goto 10
+      else
+        goto 11
+      end if
    10 read(iread,*) taer55
       v=exp(-log(taer55/2.7628)/0.79902)
       goto 71
@@ -1319,7 +1325,13 @@ c**********************************************************************c
       read(iread,*) iwave
 
       if (iwave.eq.-2) goto 1600
-      if (iwave) 16,17,18
+      if (iwave < 0) then
+        goto 16
+      else if (iwave == 0) then
+        goto 17
+      else
+        goto 18
+      end if
 
 
    16 read(iread,*) wl
@@ -1843,11 +1855,23 @@ c**********************************************************************c
 
       read(iread,*) inhomo
 
-      if(inhomo) 30,30,31
+      if (inhomo < 0) then
+        goto 30
+      else if (inhomo == 0) then
+        goto 30
+      else
+        goto 31
+      end if
 
   30  read(iread,*) idirec
 
-      if(idirec)21,21,25
+      if (idirec < 0) then
+        goto 21
+      else if (idirec == 0) then
+        goto 21
+      else
+        goto 25
+      end if
  
 c**********************************************************************c
 c     uniform conditions with brdf conditions                          c
@@ -1855,7 +1879,13 @@ c**********************************************************************c
 c
  25   read(iread,*) ibrdf
 c*********************************************************************c
-      if(ibrdf)23,23,24
+      if (ibrdf < 0) then
+        goto 23
+      else if (ibrdf == 0) then
+        goto 23
+      else
+        goto 24
+      end if
 c**********************************************************************c
 c     brdf from in-situ measurements                                   c
 c**********************************************************************c
@@ -2363,7 +2393,13 @@ c**********************************************************************c
 
   21  read(iread,*) igroun
 
-      if(igroun) 29,32,33
+      if (igroun < 0) then
+        goto 29
+      else if (igroun == 0) then
+        goto 32
+      else
+        goto 33
+      end if
       
   29  read(iread,*) nwlinf,nwlsup
       niinf=(nwlinf-.25)/0.0025+1.5
@@ -2390,7 +2426,13 @@ c**********************************************************************c
 c     non-uniform conditions with lambertian conditions                c
 c**********************************************************************c
  31   read(iread,*) igrou1,igrou2,rad
-      if(igrou1) 59,60,63
+      if (igrou1 < 0) then
+        goto 59
+      else if (igrou1 == 0) then
+        goto 60
+      else
+        goto 63
+      end if
   59  read(iread,*) (rocl(i),i=iinf,isup)
       goto 61
   60  read(iread,*) roc
@@ -2402,7 +2444,13 @@ c**********************************************************************c
       if(igrou1.eq.2) call clearw(rocl)
       if(igrou1.eq.3) call sand  (rocl)
       if(igrou1.eq.4) call lakew (rocl)
-   61 if(igrou2) 66,62,65
+   61 if (igrou2 < 0) then
+        goto 66
+      else if (igrou2 == 0) then
+        goto 62
+      else
+        goto 65
+      end if
   66  read(iread,*) (roel(i),i=iinf,isup)
       goto 34
   62  read(iread,*) roe
@@ -2557,7 +2605,13 @@ c ---- geometrical conditions ----
  
 c --- atmospheric model ----
       write(iwr, 1119)
-      if(idatm-7)226,227,228
+      if (idatm-7 < 0) then
+        goto 226
+      else if (idatm-7 == 0) then
+        goto 227
+      else
+        goto 228
+      end if
   228 write(iwr, 1281)uw,uo3
       goto 219
   227 write(iwr, 1272)
